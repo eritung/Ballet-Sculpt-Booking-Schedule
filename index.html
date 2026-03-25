@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>出席確認表 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cream: #F7F3EE;
+      --cream-dark: #EDE7DC;
+      --ink: #1C1C1E;
+      --ink-light: #555553;
+      --sage: #6B8F71;
+      --sage-light: #A8C4AC;
+      --sage-pale: #E8F0E9;
+      --vermillion: #C85250;
+      --vermillion-pale: #FAEAEA;
+      --gold: #C4973A;
+      --gold-pale: #FBF3E3;
+      --border: #D8D0C5;
+      --shadow: rgba(28, 28, 30, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 0 0 80px;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--ink);
+      color: var(--cream);
+      padding: 36px 40px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      border: 40px solid rgba(107, 143, 113, 0.18);
+      pointer-events: none;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -30px; left: 180px;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      border: 20px solid rgba(196, 151, 58, 0.12);
+      pointer-events: none;
+    }
+    .header-label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--sage-light);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    header h1 {
+      font-family: 'Noto Serif TC', serif;
+      font-weight: 900;
+      font-size: clamp(24px, 5vw, 38px);
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+    header p {
+      font-size: 13px;
+      color: rgba(247,243,238,0.55);
+      font-weight: 300;
+    }
+
+    /* ── Main layout ── */
+    main {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 32px 20px 0;
+    }
+
+    /* ── Person selector ── */
+    .selector-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 28px;
+      box-shadow: 0 2px 12px var(--shadow);
+    }
+    .selector-card label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      margin-bottom: 10px;
+    }
+    .selector-wrapper {
+      position: relative;
+    }
+    .selector-wrapper::after {
+      content: '▾';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--ink-light);
+      font-size: 14px;
+    }
+    select#person {
+      width: 100%;
+      appearance: none;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 40px 12px 16px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      background: var(--cream);
+      color: var(--ink);
+      cursor: pointer;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    select#person:focus { border-color: var(--sage); }
+    select#person option[value=""] { color: var(--ink-light); }
+
+    /* ── Status bar ── */
+    #status-bar {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      animation: fadeSlideIn 0.3s ease;
+    }
+    #status-bar.loading { background: var(--gold-pale); color: var(--gold); display: flex; }
+    #status-bar.success { background: var(--sage-pale); color: var(--sage); display: flex; }
+    #status-bar.error   { background: var(--vermillion-pale); color: var(--vermillion); display: flex; }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .loading .status-dot { background: var(--gold); animation: pulse 1s infinite; }
+    .success .status-dot { background: var(--sage); }
+    .error .status-dot   { background: var(--vermillion); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* ── Date picker section ── */
+    .dates-section { display: none; }
+    .dates-section.visible { display: block; animation: fadeSlideIn 0.35s ease; }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .section-hint {
+      font-size: 12px;
+      color: var(--ink-light);
+    }
+
+    /* Month group */
+    .month-group {
+      margin-bottom: 24px;
+    }
+    .month-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--sage);
+      padding: 0 4px 10px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+    .dates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px;
+    }
+
+    /* Date checkbox item */
+    .date-item {
+      position: relative;
+    }
+    .date-item input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      width: 0; height: 0;
+    }
+    .date-item label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      background: #fff;
+      transition: all 0.18s ease;
+      user-select: none;
+    }
+    .date-item label:hover {
+      border-color: var(--sage-light);
+      background: var(--sage-pale);
+    }
+    .date-item input:checked + label {
+      border-color: var(--vermillion);
+      background: var(--vermillion-pale);
+      color: var(--vermillion);
+    }
+    .checkbox-box {
+      width: 18px; height: 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 5px;
+      background: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .date-item input:checked + label .checkbox-box {
+      background: var(--vermillion);
+      border-color: var(--vermillion);
+    }
+    .checkbox-box svg {
+      display: none;
+    }
+    .date-item input:checked + label .checkbox-box svg {
+      display: block;
+    }
+    .date-text {
+      line-height: 1.3;
+    }
+    .date-main {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .date-sub {
+      font-size: 11px;
+      color: var(--ink-light);
+      margin-top: 1px;
+    }
+    .date-item input:checked + label .date-sub {
+      color: rgba(200, 82, 80, 0.7);
+    }
+
+    /* ── Summary bar ── */
+    .summary-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--ink);
+      color: var(--cream);
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin: 24px 0;
+      font-size: 14px;
+    }
+    .summary-count {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .count-badge {
+      background: var(--vermillion);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    /* ── Save button ── */
+    #save-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--sage);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 8px;
+    }
+    #save-btn:hover { background: #5a7a60; }
+    #save-btn:active { transform: scale(0.98); }
+    #save-btn:disabled {
+      background: var(--border);
+      color: var(--ink-light);
+      cursor: not-allowed;
+    }
+
+    /* ── Overview panel ── */
+    .overview-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 32px;
+      box-shadow: 0 2px 12px var(--shadow);
+    }
+    .overview-title {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .overview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .overview-table th {
+      text-align: left;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--cream-dark);
+    }
+    .overview-table td {
+      padding: 8px 8px;
+      border-bottom: 1px solid var(--cream-dark);
+      vertical-align: top;
+    }
+    .overview-table tr:last-child td { border-bottom: none; }
+    .person-name {
+      font-weight: 500;
+      white-space: nowrap;
+      padding-right: 12px;
+    }
+    .date-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .date-chip {
+      background: var(--vermillion-pale);
+      color: var(--vermillion);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .no-absence {
+      color: var(--ink-light);
+      font-size: 12px;
+      font-style: italic;
+    }
+
+    /* ── Config notice ── */
+    .config-notice {
+      background: var(--gold-pale);
+      border: 1px solid rgba(196,151,58,0.3);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-top: 28px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #7a5c1e;
+    }
+    .config-notice strong { font-weight: 600; }
+    .config-notice code {
+      background: rgba(196,151,58,0.15);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: monospace;
+    }
+    .config-url-field {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .config-url-field input {
+      flex: 1;
+      padding: 9px 12px;
+      border: 1px solid rgba(196,151,58,0.4);
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: monospace;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+    }
+    .config-url-field input:focus { border-color: var(--gold); }
+    .config-url-field button {
+      padding: 9px 14px;
+      background: var(--gold);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">Attendance Tracker · 2026</div>
+  <h1>無法出席日期登記</h1>
+  <p>請選擇您的名字，並勾選所有無法出席的週一</p>
+</header>
+
+<main>
+
+  <!-- Person selector -->
+  <div class="selector-card">
+    <label for="person">現在填寫的是誰？</label>
+    <div class="selector-wrapper">
+      <select id="person" onchange="onPersonChange()">
+        <option value="">── 請選擇 ──</option>
+        <option>Sunny</option>
+        <option>Jessica</option>
+        <option>Eri</option>
+        <option>Irene</option>
+        <option>Lark</option>
+        <option>Ally</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div id="status-bar">
+    <div class="status-dot"></div>
+    <span id="status-text"></span>
+  </div>
+
+  <!-- Dates section -->
+  <div class="dates-section" id="dates-section">
+    <div class="section-header">
+      <div class="section-title">請勾選無法出席的日期</div>
+      <div class="section-hint">僅顯示週一</div>
+    </div>
+
+    <div id="dates-container"></div>
+
+    <div class="summary-bar">
+      <div class="summary-count">
+        已選取無法出席
+        <span class="count-badge" id="count-badge">0</span>
+        天
+      </div>
+      <div style="font-size:12px;opacity:0.6">點選儲存後生效</div>
+    </div>
+
+    <button id="save-btn" onclick="saveDates()">儲存我的回覆</button>
+  </div>
+
+  <!-- Overview -->
+  <div class="overview-card" id="overview-card" style="display:none">
+    <div class="overview-title">📋 所有人出席狀況總覽</div>
+    <table class="overview-table">
+      <thead>
+        <tr>
+          <th>成員</th>
+          <th>無法出席日期</th>
+        </tr>
+      </thead>
+      <tbody id="overview-body"></tbody>
+    </table>
+  </div>
+
+</main>
+
+<script>
+  // ── Config ───────────────────────────────────────────────
+  const PEOPLE = ['Sunny', 'Jessica', 'Eri', 'Irene', 'Lark', 'Ally'];
+  const SCRIPT_URL_KEY = 'absenceTrackerScriptUrl';
+
+  // ⬇️ 將下方 YOUR_APPS_SCRIPT_URL 換成你的 Google Apps Script 網址
+  let scriptUrl = 'YOUR_APPS_SCRIPT_URL';
+  let allData = {}; // { person: [dateStr, ...] }
+
+  // ── Generate Mondays Mar–May 2026 ────────────────────────
+  function getMondays() {
+    const mondays = [];
+    const start = new Date(2026, 2, 1);  // March 1
+    const end   = new Date(2026, 4, 31); // May 31
+    const d = new Date(start);
+    while (d <= end) {
+      if (d.getDay() === 1) {
+        mondays.push(new Date(d));
+      }
+      d.setDate(d.getDate() + 1);
+    }
+    return mondays;
+  }
+
+  function formatDate(d) {
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `2026-${mm}-${dd}`;
+  }
+
+  function formatDisplay(d) {
+    return `${d.getMonth() + 1}/${d.getDate()}`;
+  }
+
+  const MONTH_NAMES = { 3: '三月 March', 4: '四月 April', 5: '五月 May' };
+  const mondays = getMondays();
+
+  // ── UI init ───────────────────────────────────────────────
+  window.onload = () => {
+    buildDateGrid([]);
+    if (scriptUrl !== 'YOUR_APPS_SCRIPT_URL') loadAllData();
+  };
+
+  // ── Build date grid ───────────────────────────────────────
+  function buildDateGrid(checked) {
+    const container = document.getElementById('dates-container');
+    container.innerHTML = '';
+
+    const groups = {};
+    mondays.forEach(d => {
+      const m = d.getMonth() + 1;
+      if (!groups[m]) groups[m] = [];
+      groups[m].push(d);
+    });
+
+    Object.keys(groups).sort().forEach(m => {
+      const monthDiv = document.createElement('div');
+      monthDiv.className = 'month-group';
+
+      const label = document.createElement('div');
+      label.className = 'month-label';
+      label.textContent = MONTH_NAMES[m];
+      monthDiv.appendChild(label);
+
+      const grid = document.createElement('div');
+      grid.className = 'dates-grid';
+
+      groups[m].forEach(d => {
+        const key = formatDate(d);
+        const isChecked = checked.includes(key);
+
+        const item = document.createElement('div');
+        item.className = 'date-item';
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.id = `date-${key}`;
+        cb.value = key;
+        cb.checked = isChecked;
+        cb.addEventListener('change', updateCount);
+
+        const lbl = document.createElement('label');
+        lbl.htmlFor = `date-${key}`;
+
+        lbl.innerHTML = `
+          <div class="checkbox-box">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="date-text">
+            <div class="date-main">${formatDisplay(d)}</div>
+            <div class="date-sub">週一</div>
+          </div>`;
+
+        item.appendChild(cb);
+        item.appendChild(lbl);
+        grid.appendChild(item);
+      });
+
+      monthDiv.appendChild(grid);
+      container.appendChild(monthDiv);
+    });
+
+    updateCount();
+  }
+
+  function updateCount() {
+    const all = document.querySelectorAll('#dates-container input[type="checkbox"]:checked');
+    document.getElementById('count-badge').textContent = all.length;
+  }
+
+  // ── Person change ─────────────────────────────────────────
+  function onPersonChange() {
+    const person = document.getElementById('person').value;
+    const section = document.getElementById('dates-section');
+
+    if (!person) {
+      section.classList.remove('visible');
+      return;
+    }
+
+    const checked = allData[person] || [];
+    buildDateGrid(checked);
+    section.classList.add('visible');
+  }
+
+  // ── Load all data ─────────────────────────────────────────
+  async function loadAllData() {
+    if (!scriptUrl) return;
+    setStatus('loading', '正在讀取資料...');
+
+    try {
+      const res = await fetch(`${scriptUrl}?action=get`, { method: 'GET' });
+      const data = await res.json();
+      allData = data;
+      clearStatus();
+      renderOverview();
+      const person = document.getElementById('person').value;
+      if (person) onPersonChange();
+    } catch (e) {
+      setStatus('error', '讀取失敗，請確認 Apps Script URL 是否正確');
+      console.error(e);
+    }
+  }
+
+  // ── Save dates ────────────────────────────────────────────
+  async function saveDates() {
+    const person = document.getElementById('person').value;
+    if (!person) return;
+    if (!scriptUrl) {
+      setStatus('error', '請先設定 Google Apps Script URL');
+      return;
+    }
+
+    const checked = Array.from(
+      document.querySelectorAll('#dates-container input[type="checkbox"]:checked')
+    ).map(cb => cb.value);
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = '儲存中...';
+    setStatus('loading', `正在儲存 ${person} 的資料...`);
+
+    try {
+      const res = await fetch(scriptUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ person, unavailableDates: checked })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        allData[person] = checked;
+        setStatus('success', `✓ 已儲存！共選取 ${checked.length} 個無法出席日期`);
+        renderOverview();
+      } else {
+        throw new Error(data.error || 'Unknown error');
+      }
+    } catch (e) {
+      setStatus('error', '儲存失敗：' + e.message);
+      console.error(e);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '儲存我的回覆';
+    }
+  }
+
+  // ── Overview ──────────────────────────────────────────────
+  function renderOverview() {
+    const card = document.getElementById('overview-card');
+    const tbody = document.getElementById('overview-body');
+    tbody.innerHTML = '';
+
+    let hasAnyData = false;
+
+    PEOPLE.forEach(person => {
+      const dates = allData[person] || [];
+      if (dates.length > 0) hasAnyData = true;
+
+      const tr = document.createElement('tr');
+      const tdName = document.createElement('td');
+      tdName.className = 'person-name';
+      tdName.textContent = person;
+
+      const tdDates = document.createElement('td');
+      if (dates.length === 0) {
+        tdDates.innerHTML = '<span class="no-absence">全程出席</span>';
+      } else {
+        const chips = document.createElement('div');
+        chips.className = 'date-chips';
+        dates.sort().forEach(ds => {
+          const chip = document.createElement('span');
+          chip.className = 'date-chip';
+          const d = new Date(ds + 'T00:00:00');
+          chip.textContent = `${d.getMonth()+1}/${d.getDate()}`;
+          chips.appendChild(chip);
+        });
+        tdDates.appendChild(chips);
+      }
+
+      tr.appendChild(tdName);
+      tr.appendChild(tdDates);
+      tbody.appendChild(tr);
+    });
+
+    card.style.display = 'block';
+  }
+
+  // ── Status helpers ────────────────────────────────────────
+  function setStatus(type, msg) {
+    const bar = document.getElementById('status-bar');
+    const txt = document.getElementById('status-text');
+    bar.className = type;
+    txt.textContent = msg;
+    bar.style.display = 'flex';
+  }
+  function clearStatus() {
+    document.getElementById('status-bar').style.display = 'none';
+  }
+</script>
+</body>
+</html>
