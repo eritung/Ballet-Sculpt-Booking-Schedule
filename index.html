@@ -515,13 +515,13 @@
   const SCRIPT_URL_KEY = 'absenceTrackerScriptUrl';
 
   // ⬇️ 將下方 YOUR_APPS_SCRIPT_URL 換成你的 Google Apps Script 網址
-  let scriptUrl = 'https://script.google.com/macros/s/AKfycbyGoqWVthvKUmBfEX3OnjxU-xhXRax7gATx-vRapC9Row3dez_tz91HXDReCtA-mKsR/exec';
+  let scriptUrl = 'YOUR_APPS_SCRIPT_URL';
   let allData = {}; // { person: [dateStr, ...] }
 
   // ── Generate Mondays Mar–May 2026 ────────────────────────
   function getMondays() {
     const mondays = [];
-    const start = new Date(2026, 2, 1);  // March 1
+    const start = new Date(2026, 2, 30);  // March 30
     const end   = new Date(2026, 4, 31); // May 31
     const d = new Date(start);
     while (d <= end) {
@@ -674,11 +674,12 @@
     setStatus('loading', `正在儲存 ${person} 的資料...`);
 
     try {
-      const res = await fetch(scriptUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ person, unavailableDates: checked })
+      const params = new URLSearchParams({
+        action: 'set',
+        person: person,
+        dates: checked.join(',')
       });
+      const res = await fetch(`${scriptUrl}?${params}`, { method: 'GET' });
       const data = await res.json();
 
       if (data.success) {
