@@ -391,76 +391,6 @@
       font-style: italic;
     }
 
-    /* ── Overview tabs ── */
-    .overview-tabs {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 18px;
-    }
-    .overview-tab {
-      flex: 1;
-      padding: 8px 12px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      background: var(--cream);
-      font-family: 'Noto Sans TC', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--ink-light);
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.15s;
-    }
-    .overview-tab.active {
-      background: var(--ink);
-      color: var(--cream);
-      border-color: var(--ink);
-    }
-
-    /* ── Date-by-date view ── */
-    .date-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      padding: 10px 8px;
-      border-bottom: 1px solid var(--cream-dark);
-    }
-    .date-row:last-child { border-bottom: none; }
-    .date-row-label {
-      min-width: 52px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--ink);
-      padding-top: 2px;
-      flex-shrink: 0;
-    }
-    .date-row-label small {
-      display: block;
-      font-size: 10px;
-      font-weight: 400;
-      color: var(--ink-light);
-      margin-top: 1px;
-    }
-    .absence-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-    }
-    .absence-chip {
-      background: var(--vermillion-pale);
-      color: var(--vermillion);
-      font-size: 11px;
-      font-weight: 500;
-      padding: 3px 9px;
-      border-radius: 20px;
-    }
-    .all-present {
-      font-size: 12px;
-      color: var(--sage);
-      font-weight: 500;
-      padding-top: 3px;
-    }
-
     /* ── Config notice ── */
     .config-notice {
       background: var(--gold-pale);
@@ -565,30 +495,16 @@
 
   <!-- Overview -->
   <div class="overview-card" id="overview-card" style="display:none">
-    <div class="overview-title">📋 出席狀況總覽</div>
-
-    <div class="overview-tabs">
-      <button class="overview-tab active" onclick="switchTab('person')">依成員</button>
-      <button class="overview-tab" onclick="switchTab('date')">依日期</button>
-    </div>
-
-    <!-- 依成員 -->
-    <div id="tab-person">
-      <table class="overview-table">
-        <thead>
-          <tr>
-            <th>成員</th>
-            <th>無法出席日期</th>
-          </tr>
-        </thead>
-        <tbody id="overview-body"></tbody>
-      </table>
-    </div>
-
-    <!-- 依日期 -->
-    <div id="tab-date" style="display:none">
-      <div id="date-overview-body"></div>
-    </div>
+    <div class="overview-title">📋 所有人出席狀況總覽</div>
+    <table class="overview-table">
+      <thead>
+        <tr>
+          <th>成員</th>
+          <th>無法出席日期</th>
+        </tr>
+      </thead>
+      <tbody id="overview-body"></tbody>
+    </table>
   </div>
 
 </main>
@@ -599,7 +515,7 @@
   const SCRIPT_URL_KEY = 'absenceTrackerScriptUrl';
 
   // ⬇️ 將下方 YOUR_APPS_SCRIPT_URL 換成你的 Google Apps Script 網址
-  let scriptUrl = 'YOUR_APPS_SCRIPT_URL';
+  let scriptUrl = 'https://script.google.com/macros/s/AKfycbxAVIS7JbFcRTqujFufR6ZxFEVgOcFMeH-WAdRzT_L9FtnJoRLbYV7X-7PUrsxtxyrR/exec';
   let allData = {}; // { person: [dateStr, ...] }
 
   // ── Generate Mondays Mar–May 2026 ────────────────────────
@@ -782,24 +698,18 @@
     }
   }
 
-  // ── Tab switch ────────────────────────────────────────────
-  function switchTab(tab) {
-    document.getElementById('tab-person').style.display = tab === 'person' ? 'block' : 'none';
-    document.getElementById('tab-date').style.display   = tab === 'date'   ? 'block' : 'none';
-    document.querySelectorAll('.overview-tab').forEach((el, i) => {
-      el.classList.toggle('active', (i === 0 && tab === 'person') || (i === 1 && tab === 'date'));
-    });
-  }
-
   // ── Overview ──────────────────────────────────────────────
   function renderOverview() {
     const card = document.getElementById('overview-card');
     const tbody = document.getElementById('overview-body');
     tbody.innerHTML = '';
 
-    // 依成員
+    let hasAnyData = false;
+
     PEOPLE.forEach(person => {
       const dates = allData[person] || [];
+      if (dates.length > 0) hasAnyData = true;
+
       const tr = document.createElement('tr');
       const tdName = document.createElement('td');
       tdName.className = 'person-name';
@@ -820,42 +730,10 @@
         });
         tdDates.appendChild(chips);
       }
+
       tr.appendChild(tdName);
       tr.appendChild(tdDates);
       tbody.appendChild(tr);
-    });
-
-    // 依日期
-    const dateBody = document.getElementById('date-overview-body');
-    dateBody.innerHTML = '';
-    mondays.forEach(d => {
-      const key = formatDate(d);
-      const absentPeople = PEOPLE.filter(p => (allData[p] || []).includes(key));
-
-      const row = document.createElement('div');
-      row.className = 'date-row';
-
-      const lbl = document.createElement('div');
-      lbl.className = 'date-row-label';
-      lbl.innerHTML = `${d.getMonth()+1}/${d.getDate()}<small>週一</small>`;
-
-      const right = document.createElement('div');
-      right.className = 'absence-chips';
-
-      if (absentPeople.length === 0) {
-        right.innerHTML = '<span class="all-present">✓ 全員出席</span>';
-      } else {
-        absentPeople.forEach(p => {
-          const chip = document.createElement('span');
-          chip.className = 'absence-chip';
-          chip.textContent = p;
-          right.appendChild(chip);
-        });
-      }
-
-      row.appendChild(lbl);
-      row.appendChild(right);
-      dateBody.appendChild(row);
     });
 
     card.style.display = 'block';
