@@ -599,14 +599,14 @@
   const SCRIPT_URL_KEY = 'absenceTrackerScriptUrl';
 
   // ⬇️ 將下方 YOUR_APPS_SCRIPT_URL 換成你的 Google Apps Script 網址
-  let scriptUrl = 'https://script.google.com/macros/s/AKfycbxAVIS7JbFcRTqujFufR6ZxFEVgOcFMeH-WAdRzT_L9FtnJoRLbYV7X-7PUrsxtxyrR/exec';
+  let scriptUrl = 'https://script.google.com/macros/s/AKfycbx0ehBesNMH98ynyxMqta8MkkGxqmNk8DEZyOcr9egzJK7awfcKV9CYY6SlhHhaa_cW/exec';
   let allData = {}; // { person: [dateStr, ...] }
 
   // ── Generate Mondays Mar–May 2026 ────────────────────────
   function getMondays() {
     const mondays = [];
     const start = new Date(2026, 2, 30);  // March 30
-    const end   = new Date(2026, 4, 31); // May 31
+    const end   = new Date(2026, 10, 31); // OCT 31
     const d = new Date(start);
     while (d <= end) {
       if (d.getDay() === 1) {
