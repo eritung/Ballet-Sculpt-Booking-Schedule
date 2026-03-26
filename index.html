@@ -599,14 +599,14 @@
   const SCRIPT_URL_KEY = 'absenceTrackerScriptUrl';
 
   // ⬇️ 將下方 YOUR_APPS_SCRIPT_URL 換成你的 Google Apps Script 網址
-  let scriptUrl = 'https://script.google.com/macros/s/AKfycbx0ehBesNMH98ynyxMqta8MkkGxqmNk8DEZyOcr9egzJK7awfcKV9CYY6SlhHhaa_cW/exec';
+  let scriptUrl = 'YOUR_APPS_SCRIPT_URL';
   let allData = {}; // { person: [dateStr, ...] }
 
   // ── Generate Mondays Mar–May 2026 ────────────────────────
   function getMondays() {
     const mondays = [];
     const start = new Date(2026, 2, 30);  // March 30
-    const end   = new Date(2026, 10, 31); // OCT 31
+    const end   = new Date(2026, 4, 31); // May 31
     const d = new Date(start);
     while (d <= end) {
       if (d.getDay() === 1) {
@@ -627,7 +627,12 @@
     return `${d.getMonth() + 1}/${d.getDate()}`;
   }
 
-  const MONTH_NAMES = { 3: '三月 March', 4: '四月 April', 5: '五月 May' };
+  const MONTH_NAMES = {
+    1: '一月 January', 2: '二月 February', 3: '三月 March',
+    4: '四月 April',   5: '五月 May',      6: '六月 June',
+    7: '七月 July',    8: '八月 August',   9: '九月 September',
+    10: '十月 October', 11: '十一月 November', 12: '十二月 December'
+  };
   const mondays = getMondays();
 
   // ── UI init ───────────────────────────────────────────────
@@ -648,7 +653,7 @@
       groups[m].push(d);
     });
 
-    Object.keys(groups).sort().forEach(m => {
+    Object.keys(groups).sort((a, b) => Number(a) - Number(b)).forEach(m => {
       const monthDiv = document.createElement('div');
       monthDiv.className = 'month-group';
 
